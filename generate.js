@@ -9,7 +9,7 @@ const https = require("https");
  * Gemini 호출은 Node 내장 https 모듈로 직접 전송합니다.
  * family: 4로 IPv4 연결을 우선해 일부 런타임의 fetch failed 문제를 줄입니다.
  */
-function postJsonHttps(urlString, headers, payload, timeoutMs = 28000) {
+function postJsonHttps(urlString, headers, payload, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const url = new URL(urlString);
     const body = JSON.stringify(payload);
@@ -195,6 +195,7 @@ function systemPrompt() {
     "18. HTML 태그를 사용하지 마십시오. <br>, <div>, <span>, <b> 등을 출력하지 마십시오.",
     "19. LaTeX 수식 표기를 사용하지 마십시오. \\rightarrow, $...$ 대신 →, ×, ÷, ≥, ≤ 등 일반 문자를 사용하십시오.",
     "20. 표 안에서 줄을 나누고 싶을 때에도 <br>을 쓰지 말고 가운뎃점(·), 쉼표 또는 짧은 문장을 사용하십시오.",
+    "21. 불필요한 반복 설명을 줄이고 각 항목을 간결하게 작성하여 전체 응답 길이를 과도하게 늘리지 마십시오.",
     "",
     "[개정 블룸 반응지시어 예]",
     "- 기억: 쓰시오, 찾으시오, 나열하시오",
@@ -361,16 +362,33 @@ exports.handler = async function(event) {
     }],
     generationConfig: {
       temperature: 0.35,
-      maxOutputTokens: 12000
+      maxOutputTokens: 6000,
+      thinkingConfig: {
+        thinkingLevel: "low"
+      }
     }
   };
 
   try {
+    console.log("Gemini request start", {
+      model: DEFAULT_MODEL,
+      difficulty: difficultyKey,
+      grade,
+      subject: standard.subject
+    });
+    console.time("gemini-api");
+
     const response = await postJsonHttps(
       `${GEMINI_ENDPOINT}${encodeURIComponent(DEFAULT_MODEL)}:generateContent`,
       { "x-goog-api-key": apiKey },
       payload
     );
+
+    console.timeEnd("gemini-api");
+    console.log("Gemini response received", {
+      status: response.status,
+      ok: response.ok
+    });
 
     const data = response.data;
 

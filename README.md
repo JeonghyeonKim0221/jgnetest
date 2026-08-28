@@ -37,3 +37,11 @@ Node 내장 `https.request()`를 사용합니다. 또한 IPv4 연결을 우선�
 발생하는 `fetch failed` 네트워크 오류를 더 구체적인 오류 코드로 확인할 수 있습니다.
 
 문제가 계속되면 Netlify → Logs & Metrics → Functions → generate에서 오류 코드를 확인하세요.
+
+
+## 응답 지연 개선
+Netlify 동기 함수의 연결 제한에 근접하는 24~25초 응답을 줄이기 위해 다음을 적용했습니다.
+- Gemini 3.6 Flash thinkingLevel: low
+- maxOutputTokens: 6000
+- Gemini 네트워크 타임아웃: 20초
+- Function 로그에 gemini-api 실제 소요시간 기록
