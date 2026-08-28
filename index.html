@@ -235,7 +235,7 @@
     try{
       const [dataRes,healthRes]=await Promise.all([
         fetch("/data/standards.json",{cache:"no-store"}),
-        fetch("/api/generate",{cache:"no-store"})
+        fetch("/.netlify/functions/generate",{cache:"no-store"})
       ]);
 
       if(!dataRes.ok) throw new Error("성취기준 자료를 불러오지 못했습니다.");
@@ -298,7 +298,7 @@
 
     loading(true);
     try{
-      const response=await fetch("/api/generate",{
+      const response=await fetch("/.netlify/functions/generate",{
         method:"POST",
         headers:{"content-type":"application/json"},
         body:JSON.stringify({

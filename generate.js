@@ -9,7 +9,7 @@ const https = require("https");
  * Gemini 호출은 Node 내장 https 모듈로 직접 전송합니다.
  * family: 4로 IPv4 연결을 우선해 일부 런타임의 fetch failed 문제를 줄입니다.
  */
-function postJsonHttps(urlString, headers, payload, timeoutMs = 20000) {
+function postJsonHttps(urlString, headers, payload, timeoutMs = 50000) {
   return new Promise((resolve, reject) => {
     const url = new URL(urlString);
     const body = JSON.stringify(payload);

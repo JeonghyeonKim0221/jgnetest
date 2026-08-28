@@ -45,3 +45,17 @@ Netlify 동기 함수의 연결 제한에 근접하는 24~25초 응답을 줄이
 - maxOutputTokens: 6000
 - Gemini 네트워크 타임아웃: 20초
 - Function 로그에 gemini-api 실제 소요시간 기록
+
+
+## 중요: Failed to fetch 수정
+이 버전은 브라우저에서 `/api/generate` rewrite를 사용하지 않습니다.
+
+이전 구조:
+`/api/generate` → Netlify rewrite/proxy → `/.netlify/functions/generate`
+
+수정 구조:
+브라우저 → `/.netlify/functions/generate` 직접 호출
+
+Netlify proxy rewrite는 장시간 요청에서 별도의 프록시 제한에 걸릴 수 있으므로,
+Gemini처럼 20초 이상 걸릴 수 있는 요청은 Function URL을 같은 도메인에서 직접 호출합니다.
+GEMINI_API_KEY는 여전히 브라우저에 노출되지 않고 Netlify Function에서만 읽습니다.
