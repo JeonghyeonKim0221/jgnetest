@@ -29,3 +29,11 @@ API Key는 Netlify Function의 서버 환경 변수에서만 읽습니다.
 - 어려움: 총 12점
 - 매우 어려움: 총 14점
 난이도가 높아질수록 적용·분석·평가·창안 요소의 배점 비중이 커집니다.
+
+
+## fetch failed 대응 버전
+이 버전은 Netlify Function에서 Gemini API를 호출할 때 브라우저용/global fetch 대신
+Node 내장 `https.request()`를 사용합니다. 또한 IPv4 연결을 우선하여 일부 서버리스 런타임에서
+발생하는 `fetch failed` 네트워크 오류를 더 구체적인 오류 코드로 확인할 수 있습니다.
+
+문제가 계속되면 Netlify → Logs & Metrics → Functions → generate에서 오류 코드를 확인하세요.
