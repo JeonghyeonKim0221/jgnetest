@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="2022 개정 교육과정 성취기준·성취수준 기반 초등 서논술형평가 문항 개발 도우미">
+  <title>초등 서논술형평가 문항 개발 도우미</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e4e8f0;
+      --primary:#3559d8;--primary-dark:#2845ae;--soft:#eef2ff;--danger:#b42318;
+      --shadow:0 18px 50px rgba(27,39,74,.08);
+      font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);line-height:1.62}
+    button,select,textarea{font:inherit}button{cursor:pointer}
+    header{
+      position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);
+      border-bottom:1px solid var(--line);backdrop-filter:blur(12px);
+      padding:13px max(18px,calc((100vw - 1120px)/2));
+      display:flex;align-items:center;justify-content:space-between;gap:20px
+    }
+    .brand{display:flex;align-items:center;gap:18px;min-width:0}
+    .office-logo{width:330px;max-width:36vw;height:auto;display:block;object-fit:contain}
+    .brand-copy{padding-left:18px;border-left:1px solid var(--line);min-width:0}
+    .brand-copy h1{margin:0;font-size:19px;letter-spacing:-.03em;white-space:nowrap}
+    .brand-copy p{margin:2px 0 0;color:var(--muted);font-size:11px}
+    .status{flex:none;padding:7px 10px;border-radius:999px;background:#f2f4f7;color:#667085;font-size:11px;font-weight:800}
+    .status.ok{background:#ecfdf3;color:#027a48}.status.bad{background:#fef3f2;color:#b42318}
+    main{max-width:1120px;margin:auto;padding:30px 20px 70px}
+    .page{display:none}.page.active{display:block}
+    .steps{max-width:700px;margin:0 auto 24px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+    .step{display:flex;gap:8px;align-items:center;color:#98a2b3}
+    .step .n{width:34px;height:34px;border:1px solid #d0d5dd;border-radius:50%;display:grid;place-items:center;background:#fff;font-weight:800}
+    .step.active{color:var(--primary)}.step.active .n{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .step small{font-size:10px;display:block}.line{height:1px;background:#d0d5dd}
+    .hero,.card,.paper,.image-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+    .hero{padding:26px 30px;margin-bottom:16px;display:flex;justify-content:space-between;gap:18px;align-items:center}
+    .hero h2,.result-head h2{margin:0;font-size:29px;letter-spacing:-.04em}.hero p{margin:6px 0 0;color:var(--muted)}
+    .eyebrow{margin:0 0 4px;color:var(--primary);font-size:11px;font-weight:900;letter-spacing:.06em}
+    .pill{padding:7px 10px;border-radius:999px;background:#ecfdf3;color:#027a48;font-size:11px;font-weight:800;white-space:nowrap}
+    .warning{background:#fffaeb;border:1px solid #fedf89;color:#7a2e0e;border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:12px}
+    .card{padding:28px 30px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+    .field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}.field span{font-size:13px;font-weight:800}.field b{color:var(--danger)}.field small{font-size:11px;color:var(--muted)}
+    select,textarea{width:100%;padding:12px 13px;border:1px solid #d0d5dd;border-radius:11px;background:#fff;color:var(--text);outline:none}
+    select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(53,89,216,.08)}
+    select:disabled{background:#f2f4f7;color:#98a2b3}textarea{min-height:140px;resize:vertical}
+    .band-note{font-size:11px;color:var(--muted);margin:-8px 0 16px}
+    .standard{padding:15px 17px;background:var(--soft);border:1px solid #c7d2fe;border-radius:13px;margin:-5px 0 18px}
+    .code{display:inline-block;padding:3px 8px;border:1px solid #c7d2fe;border-radius:999px;background:#fff;color:var(--primary);font-size:11px;font-weight:900}
+    .standard>p{font-weight:750;margin:7px 0}.level{display:grid;grid-template-columns:28px 1fr;gap:7px;font-size:12px;margin-top:5px}.level strong{color:var(--primary)}
+    .difficulty{padding:15px;background:#f8f9fd;border:1px solid var(--line);border-radius:13px}
+    .dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}
+    .dgrid div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}.dgrid b{display:block;font-size:12px}.dgrid span{font-size:10px;color:var(--muted)}
+    .actions{display:flex;justify-content:center;padding-top:22px}.btn{border:0;border-radius:10px;font-weight:800;padding:10px 13px}
+    .primary{background:var(--primary);color:#fff;min-width:220px}.primary:hover{background:var(--primary-dark)}.primary:disabled{opacity:.55}
+    .secondary{background:#fff;border:1px solid #d0d5dd;color:#344054}.ghost{background:transparent;color:#475467}
+    .spinner{display:inline-block;width:15px;height:15px;margin-left:7px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
+    @keyframes spin{to{transform:rotate(360deg)}}.hidden{display:none!important}
+    .result-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px}.result-head p{font-size:12px;color:var(--muted);margin:4px 0 0}
+    .toolbar{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    .image-card{padding:20px 22px;margin-bottom:16px;background:linear-gradient(140deg,#f1fbf7,#fff 55%);border-color:#cce7df}
+    .image-card h3{margin:0}.image-card p{font-size:12px;color:var(--muted)}.image-card pre{white-space:pre-wrap;background:#fff;border:1px solid #d1e9e0;border-radius:11px;padding:13px;font-family:inherit;font-size:12px}
+    .paper{padding:42px 50px;min-height:650px}.paper h1{font-size:27px;border-bottom:2px solid #172033;padding-bottom:13px}
+    .paper h2{font-size:19px;margin-top:29px;border-bottom:1px solid var(--line);padding-bottom:5px}.paper h3{font-size:15px}.paper p,.paper li{font-size:13px}
+    .paper table{width:100%;border-collapse:collapse;font-size:12px;margin:11px 0 17px}.paper th,.paper td{border:1px solid #d0d5dd;padding:8px;vertical-align:top}.paper th{background:#f2f4f7;text-align:left}
+    .paper blockquote{border-left:4px solid var(--primary);background:var(--soft);padding:8px 13px;margin:12px 0}.paper pre{white-space:pre-wrap;background:#f8f9fb;border:1px solid var(--line);border-radius:10px;padding:11px}
+    details{margin-top:14px}summary{cursor:pointer;font-size:12px;color:var(--muted);padding:8px}.raw{width:100%;min-height:400px;font-family:monospace;font-size:11px}
+    .app-footer{max-width:1120px;margin:0 auto;padding:20px 20px 32px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:-.02em;border-top:1px solid var(--line)}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,15px);background:#101828;color:#fff;padding:9px 14px;border-radius:999px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:900px){header{align-items:flex-start}.brand{align-items:flex-start;flex-direction:column;gap:8px}.office-logo{max-width:330px;width:min(70vw,330px)}.brand-copy{padding-left:0;border-left:0}.brand-copy h1{white-space:normal}}
+    @media(max-width:800px){.grid3,.dgrid{grid-template-columns:1fr 1fr}.result-head{align-items:flex-start;flex-direction:column}.paper{padding:28px 22px}}
+    @media(max-width:540px){header{padding:12px 13px;gap:10px}.brand-copy p{display:none}.status{font-size:9px}main{padding:20px 12px 55px}.hero,.card{padding:20px 17px}.hero{align-items:flex-start;flex-direction:column}.grid3,.dgrid{grid-template-columns:1fr}.step div:last-child{display:none}.paper{padding:24px 17px}}
+    @media print{@page{size:A4;margin:15mm}body{background:#fff}header,.steps,#designPage,.result-head,.image-card,details,.toast,.app-footer{display:none!important}#resultPage{display:block!important}main{max-width:none;padding:0}.paper{border:0;box-shadow:none;padding:0;min-height:0}.paper p,.paper li,.paper table{font-size:10pt}.paper table,.paper pre,.paper blockquote{break-inside:avoid}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img class="office-logo" src="/assets/jeonnam-gwangju-logo.png" alt="전남광주통합특별시교육청">
+    <div class="brand-copy">
+      <h1>초등 서논술형평가 문항 개발 도우미</h1>
+      <p>2022 개정 교육과정 · 성취수준 · 개정 블룸 텍사노미 기반</p>
+    </div>
+  </div>
+  <div id="apiStatus" class="status">AI 연결 확인 중…</div>
+</header>
+
+<main>
+  <div class="steps">
+    <div id="step1Mark" class="step active"><div class="n">1</div><div><strong>평가 설계</strong><small>학년·교과·성취기준 선택</small></div></div>
+    <div class="line"></div>
+    <div id="step2Mark" class="step"><div class="n">2</div><div><strong>결과 확인</strong><small>복사·PDF·그림 프롬프트</small></div></div>
+  </div>
+
+  <section id="designPage" class="page active">
+    <div class="hero">
+      <div><p class="eyebrow">STEP 1</p><h2>어떤 평가 문항을 만들까요?</h2><p>성취기준과 성취수준을 바탕으로 평가요소 3개와 문항·채점기준·피드백을 설계합니다.</p></div>
+      <div id="dataStatus" class="pill">자료 불러오는 중…</div>
+    </div>
+
+    <div class="warning">
+      성취기준 자료는 <strong>학년군 단위</strong>입니다. 1~4학년군은 공식 성취수준 진술을 반영하고,
+      5~6학년군은 제공된 복원·재구성 문구를 사용합니다.
+    </div>
+
+    <form id="form" class="card">
+      <div class="grid3">
+        <label class="field"><span>학년 <b>*</b></span>
+          <select id="grade" required>
+            <option value="">학년 선택</option>
+            <option value="1">1학년</option><option value="2">2학년</option>
+            <option value="3">3학년</option><option value="4">4학년</option>
+            <option value="5">5학년</option><option value="6">6학년</option>
+          </select>
+        </label>
+        <label class="field"><span>교과 <b>*</b></span><select id="subject" required disabled><option value="">교과 선택</option></select></label>
+        <label class="field"><span>문항 난이도 <b>*</b></span>
+          <select id="difficulty">
+            <option value="easy">쉬움</option>
+            <option value="normal" selected>보통</option>
+            <option value="hard">어려움</option>
+            <option value="very-hard">매우 어려움</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field"><span>성취기준 <b>*</b></span><select id="standard" required disabled><option value="">성취기준 선택</option></select></label>
+      <p id="bandNote" class="band-note"></p>
+
+      <div id="standardBox" class="standard hidden">
+        <span id="standardCode" class="code"></span>
+        <p id="standardText"></p>
+        <div id="levels"></div>
+      </div>
+
+      <label class="field">
+        <span>문항에 대한 설명 / 추가 프롬프트</span>
+        <textarea id="description" maxlength="3000" placeholder="예) 실생활 상황의 자료 제시형 3문항으로 만들고, 마지막 문항은 자료를 근거로 판단하도록 만들어 주세요."></textarea>
+        <small>원하는 상황, 문항 수, 자료 유형, 수업에서 다룬 내용 등을 자유롭게 적으세요.</small>
+      </label>
+
+      <div class="difficulty">
+        <strong>난이도 설계 기준</strong>
+        <div class="dgrid">
+          <div><b>쉬움</b><span>기초 이해 중심 · 총 8점</span></div>
+          <div><b>보통</b><span>이해·적용 균형 · 총 10점</span></div>
+          <div><b>어려움</b><span>적용·분석 중심 · 총 12점</span></div>
+          <div><b>매우 어려움</b><span>분석·평가·창안 중심 · 총 14점</span></div>
+        </div>
+      </div>
+
+      <div class="actions"><button id="generateBtn" class="btn primary" type="submit"><span id="generateText">AI로 평가도구 만들기</span><span id="spinner" class="spinner hidden"></span></button></div>
+    </form>
+  </section>
+
+  <section id="resultPage" class="page">
+    <div class="result-head">
+      <div><p class="eyebrow">STEP 2</p><h2>서·논술형 평가도구</h2><p id="resultMeta"></p></div>
+      <div class="toolbar">
+        <button id="copyMd" class="btn secondary" type="button">Markdown 복사</button>
+        <button id="copyText" class="btn secondary" type="button">텍스트 복사</button>
+        <button id="pdf" class="btn secondary" type="button">PDF 다운로드</button>
+        <button id="back" class="btn ghost" type="button">설계로 돌아가기</button>
+      </div>
+    </div>
+
+    <div id="imageCard" class="image-card hidden">
+      <p class="eyebrow">그림 자료가 필요한 문항</p>
+      <h3>ChatGPT · Gemini용 그림 생성 프롬프트</h3>
+      <p>아래 내용을 이미지 생성 도구에 그대로 붙여 넣을 수 있습니다.</p>
+      <pre id="imagePrompt"></pre>
+      <button id="copyImage" class="btn secondary" type="button">그림 프롬프트 복사</button>
+    </div>
+
+    <article id="paper" class="paper"></article>
+
+    <details>
+      <summary>원본 Markdown 보기 / 직접 수정</summary>
+      <textarea id="raw" class="raw" spellcheck="false"></textarea>
+    </details>
+  </section>
+</main>
+
+<footer class="app-footer">개발: 순천왕지초등학교 교사 김정현</footer>
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const BAND={
+    "1":"1~2학년군","2":"1~2학년군",
+    "3":"3~4학년군","4":"3~4학년군",
+    "5":"5~6학년군","6":"5~6학년군"
+  };
+
+  const $=s=>document.querySelector(s);
+  const ui={
+    design:$("#designPage"),result:$("#resultPage"),s1:$("#step1Mark"),s2:$("#step2Mark"),
+    api:$("#apiStatus"),data:$("#dataStatus"),form:$("#form"),grade:$("#grade"),subject:$("#subject"),
+    standard:$("#standard"),difficulty:$("#difficulty"),description:$("#description"),bandNote:$("#bandNote"),
+    box:$("#standardBox"),code:$("#standardCode"),text:$("#standardText"),levels:$("#levels"),
+    generate:$("#generateBtn"),generateText:$("#generateText"),spinner:$("#spinner"),resultMeta:$("#resultMeta"),
+    paper:$("#paper"),raw:$("#raw"),imageCard:$("#imageCard"),imagePrompt:$("#imagePrompt"),
+    copyMd:$("#copyMd"),copyText:$("#copyText"),copyImage:$("#copyImage"),pdf:$("#pdf"),back:$("#back"),toast:$("#toast")
+  };
+
+  let standards=[];
+  let lastMarkdown="";
+
+  bind();
+  bootstrap();
+
+  function bind(){
+    ui.grade.addEventListener("change",onGrade);
+    ui.subject.addEventListener("change",onSubject);
+    ui.standard.addEventListener("change",preview);
+    ui.form.addEventListener("submit",generate);
+    ui.back.addEventListener("click",()=>show(1));
+    ui.copyMd.addEventListener("click",()=>copy(lastMarkdown,"Markdown을 복사했습니다."));
+    ui.copyText.addEventListener("click",()=>copy(ui.paper.innerText,"텍스트를 복사했습니다."));
+    ui.copyImage.addEventListener("click",()=>copy(ui.imagePrompt.textContent,"그림 프롬프트를 복사했습니다."));
+    ui.pdf.addEventListener("click",downloadPdf);
+    ui.raw.addEventListener("input",()=>{
+      lastMarkdown=ui.raw.value;
+      render(lastMarkdown);
+      showImagePrompt(lastMarkdown);
+    });
+  }
+
+  async function bootstrap(){
+    try{
+      const [dataRes,healthRes]=await Promise.all([
+        fetch("/data/standards.json",{cache:"no-store"}),
+        fetch("/.netlify/functions/generate",{cache:"no-store"})
+      ]);
+
+      if(!dataRes.ok) throw new Error("성취기준 자료를 불러오지 못했습니다.");
+      const data=await dataRes.json();
+      standards=data.standards||[];
+      ui.data.textContent=`성취기준 ${data.meta?.count||standards.length}개 내장`;
+
+      if(healthRes.ok){
+        const health=await healthRes.json();
+        ui.api.textContent=health.hasApiKey?`Gemini 준비 · ${health.model}`:"Gemini API Key 미설정";
+        ui.api.className="status "+(health.hasApiKey?"ok":"bad");
+        if(!health.hasApiKey) toast("Netlify 환경 변수에 GEMINI_API_KEY를 설정하세요.");
+      }else{
+        ui.api.textContent="AI 함수 연결 확인 필요";
+        ui.api.className="status bad";
+      }
+    }catch(e){
+      ui.data.textContent="자료 초기화 실패";
+      ui.api.textContent="초기화 오류";
+      ui.api.className="status bad";
+      toast(errorMsg(e));
+    }
+  }
+
+  function onGrade(){
+    const band=BAND[ui.grade.value];
+    ui.bandNote.textContent=band?`${ui.grade.value}학년 선택 → ${band} 성취기준을 표시합니다.`:"";
+    const subjects=[...new Set(standards.filter(x=>x.band===band).map(x=>x.subject))]
+      .sort((a,b)=>a.localeCompare(b,"ko"));
+    setOptions(ui.subject,"교과 선택",subjects.map(x=>[x,x]));
+    ui.subject.disabled=!subjects.length;
+    setOptions(ui.standard,"성취기준 선택",[]);
+    ui.standard.disabled=true;
+    ui.box.classList.add("hidden");
+  }
+
+  function onSubject(){
+    const band=BAND[ui.grade.value];
+    const list=standards.filter(x=>x.band===band&&x.subject===ui.subject.value);
+    setOptions(ui.standard,"성취기준 선택",list.map(x=>[x.code,`[${x.code}] ${x.text}`]));
+    ui.standard.disabled=!list.length;
+    ui.box.classList.add("hidden");
+  }
+
+  function preview(){
+    const s=current();
+    if(!s){ui.box.classList.add("hidden");return;}
+    ui.code.textContent=`[${s.code}]`;
+    ui.text.textContent=s.text;
+    ui.levels.innerHTML=["A","B","C"]
+      .map(k=>`<div class="level"><strong>${k}</strong><span>${escapeHtml(s.levels[k]||"")}</span></div>`)
+      .join("");
+    ui.box.classList.remove("hidden");
+  }
+
+  async function generate(e){
+    e.preventDefault();
+    const s=current();
+    if(!s){toast("성취기준을 선택하세요.");return;}
+
+    loading(true);
+    try{
+      const response=await fetch("/.netlify/functions/generate",{
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body:JSON.stringify({
+          grade:ui.grade.value,
+          band:BAND[ui.grade.value],
+          difficulty:ui.difficulty.value,
+          description:ui.description.value.trim(),
+          standard:{
+            subject:s.subject,
+            code:s.code,
+            text:s.text,
+            levels:s.levels,
+            sourceStatus:s.sourceStatus
+          }
+        })
+      });
+
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error||"평가도구 생성에 실패했습니다.");
+
+      lastMarkdown=data.markdown||"";
+      ui.raw.value=lastMarkdown;
+      render(lastMarkdown);
+      showImagePrompt(lastMarkdown);
+
+      ui.resultMeta.textContent=
+        `${data.grade}학년 · ${data.band} · ${data.subject} · [${data.code}] · ${difficultyLabel(ui.difficulty.value)} · 총 ${data.scorePlan.total}점 · ${data.model}`;
+
+      show(2);
+      window.scrollTo({top:0,behavior:"smooth"});
+      toast("평가도구를 생성했습니다.");
+    }catch(e2){
+      toast(errorMsg(e2));
+    }finally{
+      loading(false);
+    }
+  }
+
+  function current(){
+    const band=BAND[ui.grade.value];
+    return standards.find(x=>x.band===band&&x.subject===ui.subject.value&&x.code===ui.standard.value);
+  }
+
+  function show(n){
+    const first=n===1;
+    ui.design.classList.toggle("active",first);
+    ui.result.classList.toggle("active",!first);
+    ui.s1.classList.toggle("active",first);
+    ui.s2.classList.toggle("active",!first);
+  }
+
+  function loading(on){
+    ui.generate.disabled=on;
+    ui.spinner.classList.toggle("hidden",!on);
+    ui.generateText.textContent=on?"평가도구 설계 중…":"AI로 평가도구 만들기";
+  }
+
+  function setOptions(select,placeholder,items){
+    select.innerHTML="";
+    const first=document.createElement("option");
+    first.value="";first.textContent=placeholder;select.appendChild(first);
+    items.forEach(([v,l])=>{
+      const o=document.createElement("option");
+      o.value=v;o.textContent=l;select.appendChild(o);
+    });
+  }
+
+  function difficultyLabel(v){
+    return ({easy:"쉬움",normal:"보통",hard:"어려움","very-hard":"매우 어려움"})[v]||"보통";
+  }
+
+  function normalizeGeneratedText(value){
+    return String(value||"")
+      .replace(/<br\s*\/?>/gi," · ")
+      .replace(/<\/?[A-Za-z][^>]*>/g,"")
+      .replace(/\$\s*\\rightarrow\s*\$/g,"→")
+      .replace(/\\rightarrow/g,"→")
+      .replace(/&rarr;/gi,"→")
+      .replace(/&nbsp;/gi," ");
+  }
+
+  function render(md){ui.paper.innerHTML=markdown(md);}
+
+  function markdown(md){
+    let src=escapeHtml(normalizeGeneratedText(md).replace(/\r/g,""));
+    const blocks=[];
+    src=src.replace(/```(?:[a-zA-Z0-9_-]+)?\n([\s\S]*?)```/g,(_,c)=>{
+      const token=`@@CODE_${blocks.length}@@`;
+      blocks.push(`<pre><code>${c.trim()}</code></pre>`);
+      return token;
+    });
+
+    const lines=src.split("\n"),out=[];
+    let ul=false,ol=false,table=[];
+
+    const close=()=>{
+      if(ul){out.push("</ul>");ul=false;}
+      if(ol){out.push("</ol>");ol=false;}
+    };
+
+    const flushTable=()=>{
+      if(!table.length)return;
+      const rows=table.map(r=>r.split("|").slice(1,-1).map(c=>c.trim()));
+      const divider=rows[1]&&rows[1].every(c=>/^:?-{3,}:?$/.test(c));
+      const head=rows[0]||[],body=divider?rows.slice(2):rows.slice(1);
+      out.push("<table><thead><tr>"+head.map(c=>`<th>${inline(c)}</th>`).join("")+"</tr></thead><tbody>");
+      body.forEach(r=>out.push("<tr>"+r.map(c=>`<td>${inline(c)}</td>`).join("")+"</tr>"));
+      out.push("</tbody></table>");
+      table=[];
+    };
+
+    lines.forEach(line=>{
+      if(/^\|.*\|$/.test(line.trim())){close();table.push(line.trim());return;}
+      if(table.length)flushTable();
+      if(!line.trim()){close();return;}
+
+      const h=line.match(/^(#{1,6})\s+(.+)$/);
+      if(h){close();out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`);return;}
+
+      const q=line.match(/^&gt;\s?(.*)$/);
+      if(q){close();out.push(`<blockquote>${inline(q[1])}</blockquote>`);return;}
+
+      const u=line.match(/^\s*[-*]\s+(.+)$/);
+      if(u){
+        if(ol){out.push("</ol>");ol=false;}
+        if(!ul){out.push("<ul>");ul=true;}
+        out.push(`<li>${inline(u[1])}</li>`);return;
+      }
+
+      const o=line.match(/^\s*\d+[.)]\s+(.+)$/);
+      if(o){
+        if(ul){out.push("</ul>");ul=false;}
+        if(!ol){out.push("<ol>");ol=true;}
+        out.push(`<li>${inline(o[1])}</li>`);return;
+      }
+
+      if(/^@@CODE_\d+@@$/.test(line.trim())){close();out.push(line.trim());return;}
+      close();out.push(`<p>${inline(line)}</p>`);
+    });
+
+    if(table.length)flushTable();
+    close();
+
+    let html=out.join("\n");
+    blocks.forEach((b,i)=>html=html.replace(`@@CODE_${i}@@`,b));
+    return html;
+  }
+
+  function inline(t){
+    return t
+      .replace(/`([^`]+)`/g,"<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+      .replace(/__([^_]+)__/g,"<strong>$1</strong>")
+      .replace(/\*([^*]+)\*/g,"<em>$1</em>");
+  }
+
+  function showImagePrompt(md){
+    const header="## 그림 자료 생성 프롬프트";
+    const start=md.indexOf(header);
+    if(start<0){ui.imageCard.classList.add("hidden");ui.imagePrompt.textContent="";return;}
+    let part=md.slice(start+header.length);
+    const next=part.search(/\n##\s+/);
+    if(next>=0)part=part.slice(0,next);
+    part=part.replace(/```(?:text)?/gi,"").replace(/```/g,"").trim();
+    ui.imagePrompt.textContent=normalizeGeneratedText(part);
+    ui.imageCard.classList.remove("hidden");
+  }
+
+  async function downloadPdf(){
+    const s=current();
+    const filename=s?`${ui.grade.value}학년_${s.subject}_${s.code}_서논술형평가.pdf`:"서논술형평가.pdf";
+    if(typeof html2pdf==="undefined"){window.print();return;}
+    toast("PDF를 만드는 중입니다…");
+    try{
+      await html2pdf().set({
+        margin:[10,10,10,10],filename,
+        image:{type:"jpeg",quality:.98},
+        html2canvas:{scale:2,useCORS:true},
+        jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+        pagebreak:{mode:["css","legacy"]}
+      }).from(ui.paper).save();
+    }catch(e){window.print();}
+  }
+
+  async function copy(text,msg){
+    try{
+      await navigator.clipboard.writeText(text);toast(msg);
+    }catch(e){
+      const a=document.createElement("textarea");
+      a.value=text;a.style.position="fixed";a.style.opacity="0";
+      document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();toast(msg);
+    }
+  }
+
+  function escapeHtml(v=""){
+    return String(v)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  }
+
+  let timer;
+  function toast(t){
+    clearTimeout(timer);ui.toast.textContent=t;ui.toast.classList.add("show");
+    timer=setTimeout(()=>ui.toast.classList.remove("show"),3300);
+  }
+  function errorMsg(e){return(e&&e.message)||String(e||"알 수 없는 오류가 발생했습니다.");}
+})();
+</script>
+</body>
+</html>
