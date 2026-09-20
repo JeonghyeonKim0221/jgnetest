@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="2022 개정 교육과정 성취기준·성취수준 기반 초등 서논술형평가 문항 개발 도우미">
+  <title>초등 서논술형평가 문항 개발 도우미</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root{
+      --bg:#f4f6f9;--card:#fff;--text:#172033;--muted:#667085;--line:#d9dee8;
+      --primary:#3159c9;--primary-dark:#2446a7;--soft:#eef3ff;--danger:#b42318;
+      --paper-blue:#dceff8;--paper-blue-strong:#cbe7f4;--paper-line:#333;
+      --shadow:0 18px 50px rgba(27,39,74,.08);
+      font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);line-height:1.6}
+    button,select,input,textarea{font:inherit}button{cursor:pointer}
+    header{
+      position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);
+      backdrop-filter:blur(12px);padding:13px max(18px,calc((100vw - 1180px)/2));
+      display:flex;align-items:center;justify-content:space-between;gap:20px
+    }
+    .brand{display:flex;align-items:center;gap:18px;min-width:0}.office-logo{width:315px;max-width:36vw;height:auto;display:block}
+    .brand-copy{padding-left:18px;border-left:1px solid var(--line)}.brand-copy h1{margin:0;font-size:19px;letter-spacing:-.03em;white-space:nowrap}
+    .brand-copy p{margin:2px 0 0;color:var(--muted);font-size:11px}.status{flex:none;padding:7px 10px;border-radius:999px;background:#f2f4f7;color:#667085;font-size:11px;font-weight:800}
+    .status.ok{background:#ecfdf3;color:#027a48}.status.bad{background:#fef3f2;color:#b42318}
+    main{max-width:1180px;margin:auto;padding:30px 20px 70px}.page{display:none}.page.active{display:block}
+    .steps{max-width:700px;margin:0 auto 24px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+    .step{display:flex;gap:8px;align-items:center;color:#98a2b3}.step .n{width:34px;height:34px;border:1px solid #d0d5dd;border-radius:50%;display:grid;place-items:center;background:#fff;font-weight:800}
+    .step.active{color:var(--primary)}.step.active .n{background:var(--primary);color:#fff;border-color:var(--primary)}.step small{font-size:10px;display:block}.step-line{height:1px;background:#d0d5dd}
+    .hero,.card,.prompt-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+    .hero{padding:26px 30px;margin-bottom:16px;display:flex;justify-content:space-between;gap:18px;align-items:center}.hero h2,.result-head h2{margin:0;font-size:29px;letter-spacing:-.04em}
+    .hero p{margin:6px 0 0;color:var(--muted)}.eyebrow{margin:0 0 4px;color:var(--primary);font-size:11px;font-weight:900;letter-spacing:.06em}.pill{padding:7px 10px;border-radius:999px;background:#ecfdf3;color:#027a48;font-size:11px;font-weight:800;white-space:nowrap}
+    .warning{background:#fffaeb;border:1px solid #fedf89;color:#7a2e0e;border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:12px}.card{padding:28px 30px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}.field span{font-size:13px;font-weight:800}.field b{color:var(--danger)}.field small{font-size:11px;color:var(--muted)}
+    select,input,textarea{width:100%;padding:12px 13px;border:1px solid #d0d5dd;border-radius:11px;background:#fff;color:var(--text);outline:none}
+    select:focus,input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(53,89,216,.08)}select:disabled{background:#f2f4f7;color:#98a2b3}textarea{min-height:120px;resize:vertical}
+    .band-note{font-size:11px;color:var(--muted);margin:-8px 0 16px}.standard{padding:15px 17px;background:var(--soft);border:1px solid #c7d2fe;border-radius:13px;margin:-5px 0 18px}
+    .code{display:inline-block;padding:3px 8px;border:1px solid #c7d2fe;border-radius:999px;background:#fff;color:var(--primary);font-size:11px;font-weight:900}.standard>p{font-weight:750;margin:7px 0}.level{display:grid;grid-template-columns:28px 1fr;gap:7px;font-size:12px;margin-top:5px}.level strong{color:var(--primary)}
+    .difficulty{padding:15px;background:#f8f9fd;border:1px solid var(--line);border-radius:13px}.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}.dgrid div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}.dgrid b{display:block;font-size:12px}.dgrid span{font-size:10px;color:var(--muted)}
+    .actions{display:flex;justify-content:center;padding-top:22px}.btn{border:0;border-radius:10px;font-weight:800;padding:10px 13px}.primary{background:var(--primary);color:#fff;min-width:220px}.primary:hover{background:var(--primary-dark)}.primary:disabled{opacity:.55}.secondary{background:#fff;border:1px solid #d0d5dd;color:#344054}.ghost{background:transparent;color:#475467}
+    .spinner{display:inline-block;width:15px;height:15px;margin-left:7px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}.hidden{display:none!important}
+    .result-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px}.result-head p{font-size:12px;color:var(--muted);margin:4px 0 0}.toolbar{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    .preview-hint{font-size:12px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:16px}
+    .document-stack{display:flex;flex-direction:column;gap:28px;align-items:center}
+    .page-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}.page-label{font-size:11px;color:var(--muted);font-weight:800}
+    .a4-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 9px 35px rgba(15,23,42,.12);padding:12mm 10mm;color:#111;page-break-after:always;break-after:page}
+    .a4-page:last-child{page-break-after:auto}.paper-title{text-align:center;font-size:22px;font-weight:900;margin:0 0 14px;letter-spacing:-.04em}
+    .paper-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11.5px;line-height:1.48}.paper-table th,.paper-table td{border:1px solid var(--paper-line);padding:7px 8px;vertical-align:middle;word-break:keep-all;overflow-wrap:anywhere}.paper-table th{background:#f1f1f1;font-weight:800;text-align:center}.paper-table .blue{background:var(--paper-blue);font-weight:900}.paper-table .center{text-align:center}.paper-table .top{vertical-align:top}.paper-table .level-key{width:36px;text-align:center;font-weight:900}.paper-table ul,.paper-table ol{padding-left:18px;margin:0}.paper-table li{margin:2px 0}.paper-table p{margin:0}
+    .rubric-group{display:grid;grid-template-columns:86px 44px 1fr;border-bottom:1px solid #666}.rubric-group:last-child{border-bottom:0}.rubric-label{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;border-right:1px solid #666;padding:7px}.rubric-level{display:flex;align-items:center;justify-content:center;text-align:center;border-right:1px solid #666;padding:7px}.rubric-desc{padding:7px}.rubric-lines{padding:0!important}.teacher-note{font-size:9.5px;margin-top:8px;color:#444}
+    .answer-row{display:grid;grid-template-columns:95px 1fr;border:1px solid #333;border-bottom:0}.answer-row:last-of-type{border-bottom:1px solid #333}.answer-label{background:#f1f1f1;border-right:1px solid #333;display:flex;align-items:center;justify-content:center;font-weight:900;padding:9px}.answer-content{padding:9px;font-size:11.5px;white-space:pre-line}.feedback-grid{margin-top:0;border:1px solid #333;border-top:0}.feedback-row{display:grid;grid-template-columns:95px 45px 1fr;border-top:1px solid #333}.feedback-row:first-child{border-top:0}.feedback-main{background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-weight:900;border-right:1px solid #333;grid-row:1 / span 3}.feedback-level{display:flex;align-items:center;justify-content:center;border-right:1px solid #333;font-weight:900}.feedback-text{padding:10px;font-size:11.5px}
+    .student-title{background:var(--paper-blue-strong);border:1.4px solid #222;padding:5px;text-align:center;font-size:22px;font-weight:900;margin:0}.student-summary{border-collapse:collapse;width:100%;font-size:11.5px}.student-summary th,.student-summary td{border:1px solid #333;padding:6px 8px}.student-summary th{background:var(--paper-blue);text-align:center;font-weight:900}.question-block{padding:18px 4px 8px;break-inside:avoid}.q-head{display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.65}.q-num{font-weight:800;min-width:20px}.q-score{white-space:nowrap;font-weight:700}.material-box{margin:10px 18px 10px 28px;border:1px solid #777;background:#fafafa;padding:10px 12px;font-size:11.5px;white-space:pre-line}.material-title{font-weight:900;margin-bottom:4px}.image-placeholder{margin:10px auto;border:1.5px dashed #8aa5b3;background:#eff9fd;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#56707d;font-size:11px;text-align:center;padding:8px}.student-prompt{margin:9px 18px 5px 28px;font-size:12.5px;font-weight:650}.student-prompt::before{content:"✎ ";font-weight:900}.condition-box{margin:10px 18px 5px 28px;border:1px solid #555;padding:7px 10px;font-size:11px}.condition-title{text-align:center;font-weight:900;border-bottom:1px solid #aaa;margin:-2px 0 5px;padding-bottom:4px}.answer-line{height:25px;border-bottom:1px solid #333;margin:0 8px 0 28px}.question-sep{height:1px;background:#aaa;margin:10px 0 0}
+    .prompt-card{margin-top:20px;padding:20px 22px}.prompt-card h3{margin:0 0 5px}.prompt-card p{margin:0 0 12px;font-size:12px;color:var(--muted)}.prompt-item{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px}.prompt-item strong{font-size:12px}.prompt-item pre{white-space:pre-wrap;font-family:inherit;font-size:11px;margin:6px 0 0}.app-footer{max-width:1180px;margin:0 auto;padding:20px 20px 32px;text-align:center;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}
+    @media(max-width:950px){header{align-items:flex-start}.brand{align-items:flex-start;flex-direction:column;gap:8px}.office-logo{max-width:315px;width:min(70vw,315px)}.brand-copy{padding-left:0;border-left:0}.brand-copy h1{white-space:normal}.a4-page{width:100%;min-height:auto;padding:24px 18px}.document-stack{gap:18px}}
+    @media(max-width:800px){.grid3,.grid2,.dgrid{grid-template-columns:1fr 1fr}.result-head{align-items:flex-start;flex-direction:column}.rubric-group{grid-template-columns:72px 38px 1fr}}
+    @media(max-width:540px){header{padding:12px 13px;gap:8px}.brand-copy p{display:none}.status{font-size:9px}main{padding:20px 12px 55px}.hero,.card{padding:20px 17px}.hero{align-items:flex-start;flex-direction:column}.grid3,.grid2,.dgrid{grid-template-columns:1fr}.step div:last-child{display:none}.paper-table{font-size:10px}.a4-page{padding:16px 9px}.paper-title,.student-title{font-size:18px}.toolbar{justify-content:flex-start}}
+    @media print{@page{size:A4;margin:0}body{background:#fff}header,.steps,#designPage,.result-head,.preview-hint,.page-label,.prompt-card,.app-footer,.toast{display:none!important}#resultPage{display:block!important}main{max-width:none;padding:0}.document-stack{gap:0}.page-wrap{display:block}.a4-page{width:210mm;min-height:297mm;box-shadow:none;margin:0;padding:12mm 10mm}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img class="office-logo" src="/assets/jeonnam-gwangju-logo.png" alt="전남광주통합특별시교육청">
+    <div class="brand-copy"><h1>초등 서논술형평가 문항 개발 도우미</h1><p>2022 개정 교육과정 · 공식 성취수준 · 개정 블룸 텍사노미 기반</p></div>
+  </div>
+  <div id="apiStatus" class="status">AI 연결 확인 중…</div>
+</header>
+
+<main>
+  <div class="steps">
+    <div id="step1Mark" class="step active"><div class="n">1</div><div><strong>평가 설계</strong><small>교육과정 정보와 조건 입력</small></div></div>
+    <div class="step-line"></div>
+    <div id="step2Mark" class="step"><div class="n">2</div><div><strong>평가안 확인</strong><small>개발안·답안·학생용 과제</small></div></div>
+  </div>
+
+  <section id="designPage" class="page active">
+    <div class="hero">
+      <div><p class="eyebrow">STEP 1</p><h2>서·논술형 평가를 설계해 보세요</h2><p>공식 성취기준별 성취수준을 바탕으로 개발 약안과 학생용 평가 과제를 함께 만듭니다.</p></div>
+      <div id="dataStatus" class="pill">자료 불러오는 중…</div>
+    </div>
+    <div class="warning">성취기준 자료는 <strong>학년군 단위</strong>이며, 1~6학년군 모두 공식 성취기준별 A·B·C 성취수준 진술을 반영합니다. 단원명·영역은 교과서에 따라 달라질 수 있어 필요한 경우 직접 입력하도록 했습니다.</div>
+
+    <form id="form" class="card">
+      <div class="grid3">
+        <label class="field"><span>학년 <b>*</b></span><select id="grade" required><option value="">학년 선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option><option value="4">4학년</option><option value="5">5학년</option><option value="6">6학년</option></select></label>
+        <label class="field"><span>학기</span><select id="semester"><option value="">학기 미지정</option><option value="1학기">1학기</option><option value="2학기">2학기</option></select></label>
+        <label class="field"><span>문항 난이도 <b>*</b></span><select id="difficulty"><option value="easy">쉬움</option><option value="normal" selected>보통</option><option value="hard">어려움</option><option value="very-hard">매우 어려움</option></select></label>
+      </div>
+      <div class="grid2">
+        <label class="field"><span>교과 <b>*</b></span><select id="subject" required disabled><option value="">교과 선택</option></select></label>
+        <label class="field"><span>영역</span><input id="area" maxlength="100" placeholder="예) 지구와 우주 (선택 입력)"></label>
+      </div>
+      <label class="field"><span>단원명(차시)</span><input id="unit" maxlength="200" placeholder="예) 4. 지구와 달의 운동 (선택 입력)"></label>
+      <label class="field"><span>성취기준 <b>*</b></span><select id="standard" required disabled><option value="">성취기준 선택</option></select></label>
+      <p id="bandNote" class="band-note"></p>
+      <div id="standardBox" class="standard hidden"><span id="standardCode" class="code"></span><p id="standardText"></p><div id="levels"></div></div>
+
+      <label class="field"><span>문항에 대한 설명 / 추가 요청</span><textarea id="description" maxlength="3000" placeholder="예) 관찰 자료를 활용하고, 1·2번에서 확인한 내용을 3번에서 종합하도록 만들어 주세요."></textarea><small>수업에서 다룬 상황, 사용할 자료, 강조할 사고 과정 등을 적을 수 있습니다.</small></label>
+
+      <div class="difficulty"><strong>난이도 설계 기준</strong><div class="dgrid"><div><b>쉬움</b><span>기초 이해 중심 · 총 8점</span></div><div><b>보통</b><span>이해·적용 균형 · 총 10점</span></div><div><b>어려움</b><span>적용·분석 중심 · 총 12점</span></div><div><b>매우 어려움</b><span>분석·평가·창안 중심 · 총 14점</span></div></div></div>
+      <div class="actions"><button id="generateBtn" class="btn primary" type="submit"><span id="generateText">AI로 평가도구 만들기</span><span id="spinner" class="spinner hidden"></span></button></div>
+    </form>
+  </section>
+
+  <section id="resultPage" class="page">
+    <div class="result-head">
+      <div><p class="eyebrow">STEP 2</p><h2>서·논술형 평가 자료</h2><p id="resultMeta"></p></div>
+      <div class="toolbar"><button id="copyText" class="btn secondary" type="button">전체 텍스트 복사</button><button id="pdfAll" class="btn secondary" type="button">전체 PDF</button><button id="pdfStudent" class="btn secondary" type="button">학생용 PDF</button><button id="back" class="btn ghost" type="button">설계로 돌아가기</button></div>
+    </div>
+    <div class="preview-hint">업로드한 평가 자료 개발 약안의 흐름처럼 ① 평가 개발 약안 ② 예시답안·피드백 ③ 학생용 평가 과제의 3쪽 구조로 표시합니다. 화면은 A4 인쇄 형태를 미리 보여줍니다.</div>
+
+    <div id="documentPages" class="document-stack">
+      <div class="page-wrap"><div class="page-label">1쪽 · 평가 개발 약안</div><section id="planPage" class="a4-page"></section></div>
+      <div class="page-wrap"><div class="page-label">2쪽 · 예시답안 및 피드백</div><section id="answerPage" class="a4-page"></section></div>
+      <div class="page-wrap"><div class="page-label">3쪽 · 학생용 서·논술형 평가 과제</div><section id="studentPage" class="a4-page"></section></div>
+    </div>
+
+    <div id="imagePromptCard" class="prompt-card hidden"><h3>그림 자료 생성 프롬프트</h3><p>문항에서 그림 자료가 필요한 경우에만 나타납니다. 학생용 PDF에는 프롬프트가 포함되지 않습니다.</p><div id="imagePrompts"></div></div>
+  </section>
+</main>
+
+<footer class="app-footer">개발: 순천왕지초등학교 교사 김정현</footer>
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+  const BAND={"1":"1~2학년군","2":"1~2학년군","3":"3~4학년군","4":"3~4학년군","5":"5~6학년군","6":"5~6학년군"};
+  const $=s=>document.querySelector(s);
+  const ui={design:$("#designPage"),result:$("#resultPage"),s1:$("#step1Mark"),s2:$("#step2Mark"),api:$("#apiStatus"),data:$("#dataStatus"),form:$("#form"),grade:$("#grade"),semester:$("#semester"),subject:$("#subject"),area:$("#area"),unit:$("#unit"),standard:$("#standard"),difficulty:$("#difficulty"),description:$("#description"),bandNote:$("#bandNote"),box:$("#standardBox"),code:$("#standardCode"),text:$("#standardText"),levels:$("#levels"),generate:$("#generateBtn"),generateText:$("#generateText"),spinner:$("#spinner"),resultMeta:$("#resultMeta"),plan:$("#planPage"),answer:$("#answerPage"),student:$("#studentPage"),pages:$("#documentPages"),promptCard:$("#imagePromptCard"),prompts:$("#imagePrompts"),copyText:$("#copyText"),pdfAll:$("#pdfAll"),pdfStudent:$("#pdfStudent"),back:$("#back"),toast:$("#toast")};
+  let standards=[],lastAssessment=null,lastModel="";
+
+  bind();bootstrap();
+
+  function bind(){
+    ui.grade.addEventListener("change",onGrade);ui.subject.addEventListener("change",onSubject);ui.standard.addEventListener("change",preview);ui.form.addEventListener("submit",generate);ui.back.addEventListener("click",()=>show(1));ui.copyText.addEventListener("click",()=>copy(documentText(),"전체 평가 자료를 복사했습니다."));ui.pdfAll.addEventListener("click",()=>downloadPdf("all"));ui.pdfStudent.addEventListener("click",()=>downloadPdf("student"));
+  }
+
+  async function bootstrap(){
+    try{
+      const [dataRes,healthRes]=await Promise.all([fetch("/data/standards.json",{cache:"no-store"}),fetch("/.netlify/functions/generate",{cache:"no-store"})]);
+      if(!dataRes.ok) throw new Error("성취기준 자료를 불러오지 못했습니다.");
+      const data=await dataRes.json();standards=data.standards||[];ui.data.textContent=`성취기준 ${data.meta?.count||standards.length}개 내장`;
+      if(healthRes.ok){const health=await healthRes.json();ui.api.textContent=health.hasApiKey?`Gemini 준비 · ${health.model}`:"Gemini API Key 미설정";ui.api.className="status "+(health.hasApiKey?"ok":"bad");if(!health.hasApiKey)toast("Netlify 환경 변수에 GEMINI_API_KEY를 설정하세요.");}else{ui.api.textContent="AI 함수 연결 확인 필요";ui.api.className="status bad";}
+    }catch(e){ui.data.textContent="자료 초기화 실패";ui.api.textContent="초기화 오류";ui.api.className="status bad";toast(errorMsg(e));}
+  }
+
+  function onGrade(){const band=BAND[ui.grade.value];ui.bandNote.textContent=band?`${ui.grade.value}학년 선택 → ${band} 성취기준을 표시합니다.`:"";const subjects=[...new Set(standards.filter(x=>x.band===band).map(x=>x.subject))].sort((a,b)=>a.localeCompare(b,"ko"));setOptions(ui.subject,"교과 선택",subjects.map(x=>[x,x]));ui.subject.disabled=!subjects.length;setOptions(ui.standard,"성취기준 선택",[]);ui.standard.disabled=true;ui.box.classList.add("hidden");}
+  function onSubject(){const band=BAND[ui.grade.value];const list=standards.filter(x=>x.band===band&&x.subject===ui.subject.value);setOptions(ui.standard,"성취기준 선택",list.map(x=>[x.code,`[${x.code}] ${x.text}`]));ui.standard.disabled=!list.length;ui.box.classList.add("hidden");}
+  function preview(){const s=current();if(!s){ui.box.classList.add("hidden");return;}ui.code.textContent=`[${s.code}]`;ui.text.textContent=s.text;ui.levels.innerHTML=["A","B","C"].map(k=>`<div class="level"><strong>${k}</strong><span>${esc(s.levels[k]||"")}</span></div>`).join("");ui.box.classList.remove("hidden");}
+
+  async function generate(e){
+    e.preventDefault();const s=current();if(!s){toast("성취기준을 선택하세요.");return;}loading(true);
+    try{
+      const response=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({grade:ui.grade.value,semester:ui.semester.value,band:BAND[ui.grade.value],area:ui.area.value.trim(),unit:ui.unit.value.trim(),difficulty:ui.difficulty.value,description:ui.description.value.trim(),standard:{subject:s.subject,code:s.code,text:s.text,levels:s.levels,sourceStatus:s.sourceStatus}})});
+      const data=await response.json();if(!response.ok)throw new Error(data.error||"평가도구 생성에 실패했습니다.");
+      lastAssessment=data.assessment;lastModel=data.model||"";renderAssessment(lastAssessment);ui.resultMeta.textContent=`${data.grade}학년 · ${data.band} · ${data.subject} · [${data.code}] · ${lastAssessment.meta.difficulty} · 총 ${data.scorePlan.total}점 · ${lastModel}`;show(2);window.scrollTo({top:0,behavior:"smooth"});toast("평가 개발 약안과 학생용 과제를 생성했습니다.");
+    }catch(err){toast(errorMsg(err));}finally{loading(false);}
+  }
+
+  function renderAssessment(a){renderPlan(a);renderAnswers(a);renderStudent(a);renderImagePrompts(a);}
+
+  function renderPlan(a){
+    const levels=a.standard?.levels||{};const els=a.evaluationElements||[];const tasks=a.evaluationTasks||[];const cautions=a.cautions||[];const rubrics=a.rubrics||[];
+    ui.plan.innerHTML=`<h1 class="paper-title">${esc(a.meta?.title||`${a.meta?.grade||""}학년 ${a.meta?.subject||""} 서·논술형 평가`)}</h1>
+      <table class="paper-table">
+        <colgroup><col style="width:13%"><col style="width:20%"><col style="width:13%"><col style="width:20%"><col style="width:13%"><col style="width:21%"></colgroup>
+        <tr><th>교과</th><td class="center">${esc(a.meta?.subject||"")}</td><th>영역</th><td class="center">${esc(a.meta?.area||"—")}</td><th>유형</th><td class="center">서·논술형</td></tr>
+        <tr><th>단원명(차시)</th><td colspan="5" class="center">${esc(a.meta?.unit||"—")}</td></tr>
+        <tr><th>성취기준</th><td colspan="5">[${esc(a.standard?.code||"")}] ${esc(a.standard?.text||"")}</td></tr>
+        <tr><th rowspan="3">성취수준</th><td class="level-key">A</td><td colspan="4">${esc(levels.A||"")}</td></tr>
+        <tr><td class="level-key">B</td><td colspan="4">${esc(levels.B||"")}</td></tr>
+        <tr><td class="level-key">C</td><td colspan="4">${esc(levels.C||"")}</td></tr>
+        <tr><th>평가 요소</th><td colspan="5">${els.map(x=>`<div>${esc(x.name||"")}</div>`).join("")}</td></tr>
+        <tr><th>평가 과제</th><td colspan="5">${tasks.map(x=>`<div>${esc(x)}</div>`).join("")}</td></tr>
+        <tr><th>평가시<br>유의 사항</th><td colspan="5">${cautions.map(x=>`<div>• ${esc(x)}</div>`).join("")}</td></tr>
+        <tr><th>채점<br>기준</th><td colspan="5" class="rubric-lines">${rubrics.map(r=>rubricGroup(r)).join("")}</td></tr>
+      </table>
+      <div class="teacher-note">※ 평가 요소와 문항은 성취기준 및 성취수준에 따라 구성되며, 실제 수업 맥락에 맞게 교사가 최종 검토·조정하여 활용합니다.</div>`;
+  }
+
+  function rubricGroup(r){return `<div class="rubric-group"><div class="rubric-label">${esc(r.label||`채점기준${r.elementIndex}`)}<br>(과제${r.itemNumber})</div><div><div class="rubric-level">상(${num(r.high?.score)})</div><div class="rubric-level">중(${num(r.mid?.score)})</div><div class="rubric-level">하(${num(r.low?.score)})</div></div><div><div class="rubric-desc">${esc(r.high?.description||"")}</div><div class="rubric-desc" style="border-top:1px solid #666">${esc(r.mid?.description||"")}</div><div class="rubric-desc" style="border-top:1px solid #666">${esc(r.low?.description||"")}</div></div></div>`;}
+
+  function renderAnswers(a){
+    const answers=a.sampleAnswers||[];const fb=a.feedback||{};
+    ui.answer.innerHTML=`<h1 class="paper-title">${esc(a.meta?.title||"서·논술형 평가")} · 예시답안 및 피드백</h1>
+      <div class="answer-row"><div class="answer-label">예시 답안</div><div class="answer-content">${answers.map(x=>`[과제 ${x.number}] ${esc(x.answer||"")}`).join("\n\n")}</div></div>
+      <div class="feedback-grid"><div class="feedback-row"><div class="feedback-main">피드백</div><div class="feedback-level">상</div><div class="feedback-text">${esc(fb.high||"")}</div></div><div class="feedback-row"><div class="feedback-level">중</div><div class="feedback-text">${esc(fb.mid||"")}</div></div><div class="feedback-row"><div class="feedback-level">하</div><div class="feedback-text">${esc(fb.low||"")}</div></div></div>`;
+  }
+
+  function renderStudent(a){
+    const els=a.evaluationElements||[];const items=a.items||[];
+    ui.student.innerHTML=`<h1 class="student-title">서·논술형 평가 과제</h1><table class="student-summary"><tr><th style="width:20%">단원(차시)</th><td>${esc(a.meta?.unit||"—")}</td></tr><tr><th>평가 요소</th><td>${els.map(x=>`${x.index}. ${esc(x.name||"")} (문항 ${circled(x.itemNumber)})`).join("<br>")}</td></tr></table>${items.map(item=>studentQuestion(item)).join("")}`;
+  }
+
+  function studentQuestion(item){
+    const material=(item.materialTitle||item.materialText)?`<div class="material-box">${item.materialTitle?`<div class="material-title">${esc(item.materialTitle)}</div>`:""}${textLines(item.materialText||"")}</div>`:"";
+    const image=item.imageNeeded?`<div class="image-placeholder"><strong>그림 자료 삽입 영역</strong><span>아래 별도 그림 생성 프롬프트를 활용하여 자료를 삽입할 수 있습니다.</span></div>`:"";
+    const conditions=(item.conditions||[]).length?`<div class="condition-box"><div class="condition-title">[조건]</div>${item.conditions.map((c,i)=>`<div>${i+1}. ${esc(c)}</div>`).join("")}</div>`:"";
+    const lines=Array.from({length:Number(item.answerLines)||3},()=>'<div class="answer-line"></div>').join("");
+    return `<section class="question-block"><div class="q-head"><span class="q-num">${item.number}.</span><span>${esc(item.intro||"")}</span><span class="q-score">[${num(item.score)}점]</span></div>${material}${image}<div class="student-prompt">${esc(item.prompt||"")}</div>${conditions}${lines}<div class="question-sep"></div></section>`;
+  }
+
+  function renderImagePrompts(a){const items=(a.items||[]).filter(x=>x.imageNeeded&&x.imagePrompt);if(!items.length){ui.promptCard.classList.add("hidden");ui.prompts.innerHTML="";return;}ui.prompts.innerHTML=items.map(x=>`<div class="prompt-item"><strong>문항 ${x.number} 그림 자료</strong><pre>${esc(x.imagePrompt)}</pre><button class="btn secondary copy-prompt" type="button" data-prompt="${attr(x.imagePrompt)}">프롬프트 복사</button></div>`).join("");ui.promptCard.classList.remove("hidden");ui.prompts.querySelectorAll(".copy-prompt").forEach(btn=>btn.addEventListener("click",()=>copy(btn.dataset.prompt,"그림 프롬프트를 복사했습니다.")));}
+
+  function documentText(){return [ui.plan.innerText,ui.answer.innerText,ui.student.innerText].join("\n\n----------------\n\n");}
+
+  async function downloadPdf(mode){
+    const s=current();const filename=mode==="student"?`${ui.grade.value}학년_${s?.subject||""}_${s?.code||""}_학생용_서논술형평가.pdf`:`${ui.grade.value}학년_${s?.subject||""}_${s?.code||""}_서논술형평가_전체.pdf`;
+    if(typeof html2pdf==="undefined"){window.print();return;}toast("PDF를 만드는 중입니다…");
+    const target=mode==="student"?ui.student:ui.pages;
+    const clone=target.cloneNode(true);
+    clone.querySelectorAll?.(".page-label").forEach(el=>el.remove());
+    const holder=document.createElement("div");holder.style.background="#fff";holder.appendChild(clone);document.body.appendChild(holder);
+    try{await html2pdf().set({margin:0,filename,image:{type:"jpeg",quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],before:mode==="all"?[".a4-page:not(:first-child)"]:[]}}).from(holder).save();}catch(e){toast("PDF 생성에 실패했습니다. 브라우저 인쇄 기능을 이용해 주세요.");}finally{holder.remove();}
+  }
+
+  function current(){const band=BAND[ui.grade.value];return standards.find(x=>x.band===band&&x.subject===ui.subject.value&&x.code===ui.standard.value);}
+  function show(n){const first=n===1;ui.design.classList.toggle("active",first);ui.result.classList.toggle("active",!first);ui.s1.classList.toggle("active",first);ui.s2.classList.toggle("active",!first);}
+  function loading(on){ui.generate.disabled=on;ui.spinner.classList.toggle("hidden",!on);ui.generateText.textContent=on?"평가도구 설계 중…":"AI로 평가도구 만들기";}
+  function setOptions(select,placeholder,items){select.innerHTML="";const first=document.createElement("option");first.value="";first.textContent=placeholder;select.appendChild(first);items.forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;select.appendChild(o);});}
+  function circled(n){return ({1:"①",2:"②",3:"③"})[n]||String(n||"");}
+  function num(v){return Number.isFinite(Number(v))?Number(v):"";}
+  function textLines(v){return esc(v).replace(/\n/g,"<br>");}
+  function esc(v=""){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+  function attr(v=""){return esc(v).replace(/\n/g,"&#10;");}
+  async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg);}catch{const a=document.createElement("textarea");a.value=text;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();toast(msg);}}
+  let timer;function toast(t){clearTimeout(timer);ui.toast.textContent=t;ui.toast.classList.add("show");timer=setTimeout(()=>ui.toast.classList.remove("show"),3600);}function errorMsg(e){return(e&&e.message)||String(e||"알 수 없는 오류가 발생했습니다.");}
+})();
+</script>
+<style>.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,15px);background:#101828;color:#fff;padding:9px 14px;border-radius:999px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;transform:translate(-50%,0)}</style>
+</body>
+</html>
